@@ -1,0 +1,7 @@
+*/.venv/
+*/.idea/
+# SQLite / runtime DB files
+*.db
+*.db-shm
+*.db-wal
+*.mp4

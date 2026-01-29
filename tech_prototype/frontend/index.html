@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8" />
+    <title>CryptoScope | Market Intelligence</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#FF8C00',
+                            dark: '#111827',
+                            darker: '#0B0F19',
+                            card: '#1F2937',
+                            accent: '#FFF3E0'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        float: 'float 6s ease-in-out infinite',
+                        ticker: 'ticker 40s linear infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                        'slide-up': 'slideUp 0.5s ease-out forwards'
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' }
+                        },
+                        ticker: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-100%)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 }
+                        },
+                        slideUp: {
+                            '0%': {
+                                opacity: 0,
+                                transform: 'translateY(20px)'
+                            },
+                            '100%': {
+                                opacity: 1,
+                                transform: 'translateY(0)'
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body
+    class="min-h-screen flex flex-col font-sans antialiased"
+    data-page="landing"
+>
+    <div
+        id="view-landing"
+        class="fixed inset-0 z-50 bg-white dark:bg-brand-darker overflow-y-auto transition-colors duration-300"
+    >
+        <div
+            class="min-h-screen flex flex-col items-center justify-center pb-10 md:pb-32 landing-bg grid-pattern text-center px-4 relative"
+        >
+            <div class="absolute top-6 right-6 z-50">
+                <button
+                    onclick="app.theme.toggle()"
+                    class="p-3 md:p-2 rounded-full bg-white/80 dark:bg-gray-800/80 backdrop-blur shadow-lg border border-gray-100 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:text-brand-orange transition-colors"
+                >
+                    <i
+                        data-lucide="moon"
+                        class="w-6 h-6 md:w-5 md:h-5 hidden dark:block"
+                    ></i>
+                    <i
+                        data-lucide="sun"
+                        class="w-6 h-6 md:w-5 md:h-5 block dark:hidden"
+                    ></i>
+                </button>
+            </div>
+
+            <div
+                class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none"
+            >
+                <div
+                    class="absolute top-1/4 left-1/4 w-48 h-48 md:w-64 md:h-64 bg-brand-orange/10 dark:bg-brand-orange/5 rounded-full blur-3xl animate-float"
+                ></div>
+                <div
+                    class="absolute bottom-1/3 right-1/4 w-64 h-64 md:w-96 md:h-96 bg-blue-500/5 dark:bg-blue-500/10 rounded-full blur-3xl animate-float"
+                    style="animation-delay: -2s"
+                ></div>
+            </div>
+
+            <div
+                class="relative z-10 animate-slide-up w-full max-w-4xl mx-auto"
+            >
+                <div class="mb-6 md:mb-8 flex justify-center">
+                    <div
+                        class="bg-brand-orange text-white p-4 md:p-5 rounded-2xl shadow-2xl shadow-brand-orange/20 dark:shadow-brand-orange/10"
+                    >
+                        <i
+                            data-lucide="scan-search"
+                            class="w-12 h-12 md:w-16 md:h-16"
+                        ></i>
+                    </div>
+                </div>
+                <h1
+                    class="text-4xl sm:text-5xl md:text-8xl font-extrabold tracking-tight text-gray-900 dark:text-white mb-4 md:mb-6 drop-shadow-sm px-2"
+                >
+                    CRYPTO<span class="text-brand-orange">SCOPE</span>
+                </h1>
+                <p
+                    class="text-lg md:text-2xl text-gray-500 dark:text-gray-400 max-w-3xl mx-auto mb-8 md:mb-12 font-light leading-relaxed px-4"
+                >
+                    The industry standard for historical OHLCV data analysis.
+                    <br class="hidden md:inline" />
+                    <span
+                        class="text-gray-900 dark:text-gray-200 font-medium block md:inline mt-1"
+                        >10+ years of market history.</span
+                    >
+                </p>
+                <div
+                    class="flex flex-col sm:flex-row gap-4 md:gap-5 justify-center w-full px-6"
+                >
+                    <button
+                        onclick="app.router.go('dashboard')"
+                        class="w-full sm:w-auto px-8 py-4 md:px-10 md:py-5 bg-brand-orange text-white rounded-full font-bold text-lg md:text-xl hover:bg-orange-600 transition-all shadow-xl shadow-brand-orange/20 hover:shadow-brand-orange/40 transform hover:-translate-y-1"
+                    >
+                        Initialize Terminal
+                    </button>
+                    <button
+                        onclick="document.getElementById('features-section').scrollIntoView({behavior: 'smooth'})"
+                        class="w-full sm:w-auto px-8 py-4 md:px-10 md:py-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 rounded-full font-bold text-lg md:text-xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all shadow-sm"
+                    >
+                        Learn More
+                    </button>
+                </div>
+            </div>
+
+            <div
+                class="absolute bottom-6 md:bottom-10 animate-bounce text-gray-400 dark:text-gray-600"
+            >
+                <i
+                    data-lucide="chevron-down"
+                    class="w-6 h-6 md:w-8 md:h-8"
+                ></i>
+            </div>
+        </div>
+
+        <div
+            id="features-section"
+            class="bg-white dark:bg-brand-darker py-16 md:py-24 px-4 border-t border-gray-100 dark:border-gray-800 transition-colors duration-300"
+        >
+            <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-12 md:mb-16">
+                    <h2
+                        class="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white"
+                    >
+                        Institutional Grade Data
+                    </h2>
+                    <p
+                        class="text-gray-500 dark:text-gray-400 mt-2 md:mt-4 text-base md:text-lg"
+                    >
+                        Comprehensive archives for backtesting and analysis.
+                    </p>
+                </div>
+
+                <div
+                    class="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12"
+                >
+                    <div
+                        class="p-6 md:p-8 rounded-3xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800"
+                    >
+                        <div
+                            class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl flex items-center justify-center mb-4"
+                        >
+                            <i data-lucide="database" class="w-6 h-6"></i>
+                        </div>
+                        <h3
+                            class="text-xl font-bold mb-2 text-gray-900 dark:text-white"
+                        >
+                            10-Year History
+                        </h3>
+                        <p
+                            class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed"
+                        >
+                            Access full OHLCV candles dating back to genesis
+                            blocks.
+                        </p>
+                    </div>
+                    <div
+                        class="p-6 md:p-8 rounded-3xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800"
+                    >
+                        <div
+                            class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 text-brand-orange rounded-xl flex items-center justify-center mb-4"
+                        >
+                            <i data-lucide="zap" class="w-6 h-6"></i>
+                        </div>
+                        <h3
+                            class="text-xl font-bold mb-2 text-gray-900 dark:text-white"
+                        >
+                            Real-Time Feeds
+                        </h3>
+                        <p
+                            class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed"
+                        >
+                            Millisecond latency updates for live price action.
+                        </p>
+                    </div>
+                    <div
+                        class="p-6 md:p-8 rounded-3xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800"
+                    >
+                        <div
+                            class="w-12 h-12 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-xl flex items-center justify-center mb-4"
+                        >
+                            <i data-lucide="table" class="w-6 h-6"></i>
+                        </div>
+                        <h3
+                            class="text-xl font-bold mb-2 text-gray-900 dark:text-white"
+                        >
+                            Export Ready
+                        </h3>
+                        <p
+                            class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed"
+                        >
+                            Download standardized CSV or JSON datasets.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer
+            class="bg-brand-darker text-white py-8 text-center text-sm text-gray-500 border-t border-gray-800"
+        >
+            <p>&copy; 2025 CryptoScope Data Services.</p>
+        </footer>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>

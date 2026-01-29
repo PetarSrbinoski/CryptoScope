@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pandas
+requests
+beautifulsoup4
+lxml
+python-dotenv
+ta
+tensorflow
+scikit-learn
+nltk
+vaderSentiment
+keras
+httpx

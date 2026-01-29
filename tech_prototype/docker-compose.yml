@@ -1,0 +1,62 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: tech_api
+    environment:
+      - PORT=8000
+      - TECHNICAL_MS_URL=http://technical_ms:8001
+      - LSTM_MS_URL=http://lstm_ms:8002
+      - DB_PATH=/data/crypto.db
+    ports:
+      - "8000:8000"
+    volumes:
+      - shared_db:/data
+    depends_on:
+      technical_ms:
+        condition: service_started
+      lstm_ms:
+        condition: service_started
+    # Allow extra time for pipeline to run on startup
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/docs"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 300s
+
+  technical_ms:
+    build:
+      context: ../microservices/technical_ms
+      dockerfile: Dockerfile
+    container_name: technical_ms
+    environment:
+      - DB_PATH=/data/crypto.db
+    ports:
+      - "8001:8001"
+    volumes:
+      - shared_db:/data
+
+  lstm_ms:
+    build:
+      context: ../microservices/lstm_ms
+      dockerfile: Dockerfile
+    container_name: lstm_ms
+    environment:
+      - DB_PATH=/data/crypto.db
+    ports:
+      - "8002:8002"
+    volumes:
+      - shared_db:/data
+
+  web:
+    build:
+      context: ./frontend
+    container_name: tech_web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+volumes:
+  shared_db:

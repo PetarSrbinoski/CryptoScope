@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8">
+    <title>CryptoScope | API Documentation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#FF8C00',
+                            dark: '#111827',
+                            darker: '#0B0F19',
+                            card: '#1F2937',
+                            accent: '#FFF3E0',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        ticker: 'ticker 40s linear infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        ticker: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-100%)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <!-- Shared styles -->
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        .code-block {
+            background-color: #0B0F19;
+            color: #4ADE80;
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.75rem;
+            border: 1px solid #111827;
+            overflow-x: auto;
+        }
+
+        @media (min-width: 768px) {
+            .code-block {
+                font-size: 0.8rem;
+                padding: 1rem 1.25rem;
+            }
+        }
+
+        /* Small helper for query param chips */
+        .param-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            border: 1px solid rgba(148,163,184,0.35);
+            background: rgba(148,163,184,0.08);
+            color: inherit;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        }
+
+        .kbd {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.72rem;
+            padding: 0.15rem 0.35rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(148,163,184,0.35);
+            background: rgba(148,163,184,0.10);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans antialiased" data-page="docs">
+
+<!-- Top Ticker -->
+<div class="bg-brand-darker text-white overflow-hidden whitespace-nowrap py-2 text-xs font-medium tracking-wide z-40 border-b border-gray-800">
+    <div class="inline-block animate-ticker">
+        <span class="mx-6 opacity-80">CryptoScope API • http://localhost:8000</span>
+        <span class="mx-6 opacity-60">OHLCV endpoints · Symbols · Technicals · Sentiment · LSTM</span>
+        <span class="mx-6 opacity-60">Backtesting & research ready</span>
+    </div>
+</div>
+
+<!-- NAVBAR -->
+<nav class="panel-clean sticky top-0 z-40 shadow-sm border-b border-gray-200 dark:border-gray-800">
+    <div class="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-16 md:h-20">
+
+            <!-- Left: Logo -->
+            <div onclick="app.router.go('landing')" class="flex items-center gap-2 md:gap-3 group cursor-pointer">
+                <div class="bg-brand-orange text-white p-1.5 md:p-2 rounded-lg shadow-sm">
+                    <i data-lucide="scan-search" class="w-5 h-5 md:w-6 md:h-6"></i>
+                </div>
+                <span class="text-xl md:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white">
+                    CRYPTO<span class="text-brand-orange">SCOPE</span>
+                </span>
+            </div>
+
+            <!-- Center nav -->
+            <div class="hidden md:flex items-center space-x-8">
+                <button
+                        onclick="window.location.href='dashboard.html'"
+                        id="nav-dashboard"
+                        class="nav-link text-gray-500 dark:text-gray-400 font-semibold
+                               border-b-2 border-transparent
+                               hover:text-brand-orange hover:border-brand-orange
+                               px-1 py-7 h-20">
+                    Market Data
+                </button>
+
+                <button
+                        id="nav-api"
+                        class="nav-link text-gray-900 dark:text-white font-semibold
+                               border-b-2 border-brand-orange
+                               px-1 py-7 h-20 cursor-default">
+                    API Docs
+                </button>
+            </div>
+
+            <!-- Right -->
+            <div class="flex items-center gap-3 md:gap-4 w-auto justify-end">
+                <div class="hidden md:block w-[250px]"></div>
+
+                <button onclick="app.theme.toggle()"
+                        class="p-2 md:p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800
+                               text-gray-600 dark:text-gray-300
+                               hover:bg-brand-orange hover:text-white transition-all">
+                    <i data-lucide="moon" class="w-5 h-5 hidden dark:block"></i>
+                    <i data-lucide="sun" class="w-5 h-5 block dark:hidden"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- MAIN -->
+<main class="flex-grow">
+    <div class="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12 space-y-10 animate-fade-in">
+
+        <!-- Header -->
+        <section class="space-y-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-orange/10 text-brand-orange text-xs font-semibold">
+                <i data-lucide="file-code-2" class="w-4 h-4"></i>
+                <span>API Reference</span>
+            </div>
+            <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight">
+                CryptoScope REST API
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 max-w-2xl text-sm md:text-base">
+                Programmatic access to OHLCV history, market summaries, technical indicators,
+                LSTM forecasting, sentiment & on-chain signals, plus ETL triggers.
+            </p>
+            <div class="mt-2 inline-flex items-center gap-3 text-xs md:text-sm text-gray-500 dark:text-gray-400">
+                <span class="px-2 py-0.5 rounded bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 font-mono">
+                    v1 · Local Dev
+                </span>
+                <span>Base URL:</span>
+                <code class="font-mono px-2 py-0.5 rounded bg-brand-darker text-green-400 text-xs border border-gray-800">
+                    http://localhost:8000
+                </code>
+            </div>
+
+            <div class="scope-card rounded-2xl p-4 md:p-5 shadow-sm mt-6">
+                <div class="flex items-start gap-3">
+                    <div class="bg-brand-orange/10 text-brand-orange p-2 rounded-xl">
+                        <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-sm md:text-base font-semibold text-gray-900 dark:text-white">
+                            Quick Start
+                        </p>
+                        <p class="text-xs md:text-sm text-gray-600 dark:text-gray-400">
+                            Typical flow: <span class="kbd">POST /api/etl/run</span> → <span class="kbd">GET /api/symbols</span> →
+                            <span class="kbd">GET /api/prices/{symbol}</span> → <span class="kbd">GET /api/technical/{symbol}</span> →
+                            <span class="kbd">GET /api/signal/{symbol}</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Layout -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+
+            <!-- Sidebar -->
+            <aside class="lg:col-span-1 space-y-4">
+                <div class="scope-card rounded-2xl p-4 md:p-5 shadow-sm">
+                    <h2 class="text-sm font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                        <i data-lucide="list-tree" class="w-4 h-4 text-brand-orange"></i>
+                        Endpoints
+                    </h2>
+                    <nav class="space-y-2 text-sm">
+
+                        <a href="#endpoint-symbols"
+                           class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="font-mono text-xs text-brand-orange">GET</span>
+                            <span class="flex-1 ml-2 truncate">/api/symbols</span>
+                        </a>
+
+                        <a href="#endpoint-prices"
+                           class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="font-mono text-xs text-brand-orange">GET</span>
+                            <span class="flex-1 ml-2 truncate">/api/prices/{symbol}</span>
+                        </a>
+
+                        <a href="#endpoint-technical"
+                           class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="font-mono text-xs text-brand-orange">GET</span>
+                            <span class="flex-1 ml-2 truncate">/api/technical/{symbol}</span>
+                        </a>
+
+                        <a href="#endpoint-indicators"
+                           class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="font-mono text-xs text-brand-orange">GET</span>
+                            <span class="flex-1 ml-2 truncate">/api/indicators/{symbol}</span>
+                        </a>
+
+                        <a href="#endpoint-lstm"
+                           class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="font-mono text-xs text-brand-orange">GET</span>
+                            <span class="flex-1 ml-2 truncate">/api/lstm/{symbol}</span>
+                        </a>
+
+                        <a href="#endpoint-sentiment"
+                           class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="font-mono text-xs text-brand-orange">GET</span>
+                            <span class="flex-1 ml-2 truncate">/api/sentiment/{symbol}</span>
+                        </a>
+
+                        <a href="#endpoint-onchain"
+                           class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="font-mono text-xs text-brand-orange">GET</span>
+                            <span class="flex-1 ml-2 truncate">/api/onchain/{symbol}</span>
+                        </a>
+
+                        <a href="#endpoint-signal"
+                           class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="font-mono text-xs text-brand-orange">GET</span>
+                            <span class="flex-1 ml-2 truncate">/api/signal/{symbol}</span>
+                        </a>
+
+                        <a href="#endpoint-etl"
+                           class="flex items-center justify-between px-3 py-2 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                            <span class="font-mono text-xs text-emerald-400">POST</span>
+                            <span class="flex-1 ml-2 truncate">/api/etl/run</span>
+                        </a>
+
+                    </nav>
+                </div>
+
+                <div class="scope-card rounded-2xl p-4 md:p-5 text-xs md:text-sm text-gray-600 dark:text-gray-400 shadow-sm">
+                    <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
+                        <i data-lucide="info" class="w-4 h-4 text-brand-orange"></i>
+                        Status Codes
+                    </h3>
+                    <ul class="space-y-1">
+                        <li><span class="font-mono text-emerald-400">200</span> – Successful request (or cached fallback for some endpoints)</li>
+                        <li><span class="font-mono text-emerald-400">201</span> – Successful POST (ETL)</li>
+                        <li><span class="font-mono text-red-400">404</span> – Symbol not found / no price data</li>
+                        <li><span class="font-mono text-red-400">422</span> – Invalid query params (FastAPI validation)</li>
+                        <li><span class="font-mono text-red-400">500</span> – Server / DB / model error (some endpoints may still return 200 with an <span class="kbd">error</span> field)</li>
+                    </ul>
+                </div>
+
+                <div class="scope-card rounded-2xl p-4 md:p-5 text-xs md:text-sm text-gray-600 dark:text-gray-400 shadow-sm">
+                    <h3 class="font-semibold text-gray-900 dark:text-white flex items-center gap-2 mb-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-brand-orange"></i>
+                        Notes
+                    </h3>
+                    <ul class="space-y-2">
+                        <li>Symbols are stored as strings like <span class="kbd">BTC-USD</span>.</li>
+                        <li>Time-series responses are sorted by ascending date.</li>
+                        <li>Some analytics endpoints require enough historical candles (typically 30+).</li>
+                    </ul>
+                </div>
+
+            </aside>
+
+            <!-- Main Docs -->
+            <div class="lg:col-span-3 space-y-10">
+
+                <!-- GET /api/symbols -->
+                <section id="endpoint-symbols" class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/40">GET</span>
+                                <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">/api/symbols</span>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold">List Supported Assets (Ranked)</h2>
+                            <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                                Returns paginated assets with computed <span class="font-semibold text-gray-800 dark:text-gray-200">latest close, previous close change (%), volume, and market cap</span>.
+                                Results are ranked primarily by market cap, then volume.
+                            </p>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <span class="param-chip">page=1</span>
+                                <span class="param-chip">page_size=100</span>
+                                <span class="param-chip">q=btc</span>
+                            </div>
+
+                            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-3">
+                                If the <span class="kbd">prices</span> table is missing, the endpoint returns an error telling you to run the pipeline first.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-2">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Request</h3>
+                            <pre class="code-block">GET http://localhost:8000/api/symbols?page=1&page_size=50&q=btc</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Response</h3>
+                            <pre class="code-block">{
+  "items": [
+    {
+      "id": 1,
+      "rank": 1,
+      "symbol": "BTC-USD",
+      "name": "BTC",
+      "price": 37800.25,
+      "change": -1.24,
+      "vol": 15200000,
+      "mcap": 740000000000
+    }
+  ],
+  "total": 245
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GET /api/prices/{symbol} -->
+                <section id="endpoint-prices" class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/40">GET</span>
+                                <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">/api/prices/{symbol}</span>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold">OHLCV History for One Asset</h2>
+                            <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                                Returns OHLCV candles for a symbol, sorted by ascending date.
+                                Optional timeframe returns a sliced/resampled view.
+                            </p>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <span class="param-chip">timeframe=1d</span>
+                                <span class="param-chip">timeframe=1y</span>
+                                <span class="param-chip">timeframe=10y</span>
+                            </div>
+
+                            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-3">
+                                Timeframes: <span class="kbd">1d</span> (last ~180 days daily), <span class="kbd">1y</span> (weekly resample), <span class="kbd">10y</span> (monthly resample).
+                                If no timeframe is provided, full data is returned.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-2">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Request</h3>
+                            <pre class="code-block">GET http://localhost:8000/api/prices/BTC-USD?timeframe=1y</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Response</h3>
+                            <pre class="code-block">[
+  {
+    "date": "2021-01-01",
+    "open": 29300.15,
+    "high": 29650.00,
+    "low": 28800.28,
+    "close": 29374.12,
+    "volume": 12839200000
+  }
+]</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GET /api/technical/{symbol} -->
+                <section id="endpoint-technical" class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/40">GET</span>
+                                <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">/api/technical/{symbol}</span>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold">Technical Indicators + Multi-Timeframe Summary</h2>
+                            <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                                Computes common indicators on three timeframes:
+                                <span class="font-semibold text-gray-800 dark:text-gray-200">1d (daily), 1y (weekly), 10y (monthly)</span>.
+                                Each timeframe includes indicator values, per-indicator signals, and a summarized overall signal.
+                            </p>
+                            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-3">
+                                Requires sufficient history (roughly 30+ candles for each timeframe) or returns fewer/empty indicators.
+                                If no price data exists, returns <span class="kbd">404</span>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-2">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Request</h3>
+                            <pre class="code-block">GET http://localhost:8000/api/technical/BTC-USD</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Response (Shape)</h3>
+                            <pre class="code-block">{
+  "symbol": "BTC-USD",
+  "timeframes": {
+    "1d": {
+      "from": "2024-07-10",
+      "to": "2025-01-06",
+      "granularity": "daily",
+      "indicators": {
+        "RSI (14)": { "value": 48.2, "signal": "hold" },
+        "MACD (12,26,9)": { "value": -12.1, "signal": "sell" }
+      },
+      "summary": { "buy": 2, "sell": 3, "hold": 4, "overall": "hold" }
+    }
+  }
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="scope-card rounded-xl p-4 text-xs md:text-sm shadow-sm">
+                        <p class="text-gray-600 dark:text-gray-400">
+                            Indicators included: RSI(14), MACD(12,26,9), Stochastic %K, ADX(+DI/-DI logic),
+                            CCI(20), SMA20, EMA20, WMA20, Bollinger Bands(20,2), Volume MA20.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- GET /api/indicators/{symbol} -->
+                <section id="endpoint-indicators" class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/40">GET</span>
+                                <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">/api/indicators/{symbol}</span>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold">Alias: Technical Indicators</h2>
+                            <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                                Convenience endpoint that returns the same payload as
+                                <span class="kbd">GET /api/technical/{symbol}</span>.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-2">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Request</h3>
+                            <pre class="code-block">GET http://localhost:8000/api/indicators/ETH-USD</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Response</h3>
+                            <pre class="code-block">(same as /api/technical/{symbol})</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GET /api/lstm/{symbol} -->
+                <section id="endpoint-lstm" class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/40">GET</span>
+                                <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">/api/lstm/{symbol}</span>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold">LSTM Price Forecast</h2>
+                            <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                                Runs the server-side LSTM analysis workflow for the requested symbol.
+                                The <span class="kbd">lookback</span> parameter controls how many recent steps are used for the model input window.
+                            </p>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <span class="param-chip">lookback=30</span>
+                            </div>
+
+                            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-3">
+                                Returns <span class="kbd">500</span> if the model pipeline throws an exception.
+                                Exact output fields depend on your <span class="kbd">run_lstm_analysis()</span> implementation.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-2">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Request</h3>
+                            <pre class="code-block">GET http://localhost:8000/api/lstm/BTC-USD?lookback=45</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Response (Typical)</h3>
+                            <pre class="code-block">{
+  "symbol": "BTC-USD",
+  "lookback": 45,
+  "forecast": [/* ... */],
+  "metrics": { /* ... */ }
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GET /api/sentiment/{symbol} -->
+                <section id="endpoint-sentiment" class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/40">GET</span>
+                                <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">/api/sentiment/{symbol}</span>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold">Sentiment Timeline (with Optional Refresh)</h2>
+                            <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                                Returns a recent sentiment series for the symbol.
+                                By default it can serve cached DB data, but you can request a live refresh.
+                            </p>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <span class="param-chip">window=1d</span>
+                                <span class="param-chip">limit=30</span>
+                                <span class="param-chip">refresh=false</span>
+                            </div>
+
+                            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-3">
+                                If a refresh fails, the endpoint still returns <span class="kbd">200</span> with cached content and an <span class="kbd">error</span> field.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-2">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Request</h3>
+                            <pre class="code-block">GET http://localhost:8000/api/sentiment/BTC-USD?window=1d&limit=30&refresh=true</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Response (Shape)</h3>
+                            <pre class="code-block">{
+  "symbol": "BTC-USD",
+  "window": "1d",
+  "items": [
+    { "ts": "2025-01-06T10:00:00Z", "score": 0.21 }
+  ],
+  "error": null
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GET /api/onchain/{symbol} -->
+                <section id="endpoint-onchain" class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/40">GET</span>
+                                <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">/api/onchain/{symbol}</span>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold">On-chain Metrics (with Optional Refresh)</h2>
+                            <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                                Returns computed / stored on-chain metrics for the symbol.
+                                Use <span class="kbd">refresh=true</span> to force recomputation / re-fetch (depends on your implementation).
+                            </p>
+
+                            <div class="mt-3 flex flex-wrap gap-2">
+                                <span class="param-chip">refresh=false</span>
+                            </div>
+
+                            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-3">
+                                If refresh fails, the endpoint returns <span class="kbd">200</span> with an empty <span class="kbd">metrics</span> object and a note.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-2">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Request</h3>
+                            <pre class="code-block">GET http://localhost:8000/api/onchain/BTC-USD?refresh=true</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Response (Shape)</h3>
+                            <pre class="code-block">{
+  "symbol": "BTC-USD",
+  "metrics": {
+    "active_addresses": 912345,
+    "nvt": 48.2
+  },
+  "note": "ok"
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- GET /api/signal/{symbol} -->
+                <section id="endpoint-signal" class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-brand-orange/10 text-brand-orange border border-brand-orange/40">GET</span>
+                                <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">/api/signal/{symbol}</span>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold">Composite Trading Signal</h2>
+                            <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                                Returns a final signal computed from your sentiment + on-chain components
+                                (and whatever logic is implemented inside <span class="kbd">compute_signal()</span>).
+                            </p>
+                            <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-3">
+                                This endpoint reads from the database and returns a deterministic output for the current stored state.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-2">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Request</h3>
+                            <pre class="code-block">GET http://localhost:8000/api/signal/ETH-USD</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Response (Typical)</h3>
+                            <pre class="code-block">{
+  "symbol": "ETH-USD",
+  "signal": "buy",
+  "confidence": 0.63,
+  "components": {
+    "sentiment": "hold",
+    "onchain": "buy"
+  }
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- POST /api/etl/run -->
+                <section id="endpoint-etl" class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="inline-flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-400/40">POST</span>
+                                <span class="font-mono text-xs bg-gray-100 dark:bg-gray-900 px-2 py-0.5 rounded-full text-gray-600 dark:text-gray-300">/api/etl/run</span>
+                            </div>
+                            <h2 class="text-lg md:text-xl font-semibold">Trigger Full ETL Pipeline</h2>
+                            <p class="text-sm md:text-base text-gray-600 dark:text-gray-400 mt-1">
+                                Runs the complete ingestion pipeline (symbols + missing history backfill).
+                                Use this before analytics endpoints if your DB is empty.
+                            </p>
+                            <ol class="list-decimal ml-5 text-sm text-gray-600 dark:text-gray-400 mt-1 space-y-1">
+                                <li>Download / refresh symbol list</li>
+                                <li>Check which symbols already have stored data</li>
+                                <li>Fetch missing OHLCV history and insert into DB</li>
+                            </ol>
+                        </div>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-4 md:gap-6 mt-2">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Request</h3>
+                            <pre class="code-block">POST http://localhost:8000/api/etl/run</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Example Response</h3>
+                            <pre class="code-block">{
+  "status": "completed"
+}</pre>
+                        </div>
+                    </div>
+
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-1">
+                        Documented here for completeness (implementation may live in a different module).
+                    </p>
+                </section>
+
+                <!-- Usage Examples -->
+                <section class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-5">
+                    <h2 class="text-lg md:text-xl font-semibold flex items-center gap-2">
+                        <i data-lucide="code-2" class="w-5 h-5 text-brand-orange"></i>
+                        Example Usage
+                    </h2>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">JavaScript</h3>
+                            <pre class="code-block">// 1) Ensure DB has data (optional)
+await fetch("http://localhost:8000/api/etl/run", { method: "POST" });
+
+// 2) Search symbols
+const res = await fetch("http://localhost:8000/api/symbols?page=1&page_size=50&q=btc");
+const { items } = await res.json();
+const sym = items?.[0]?.symbol ?? "BTC-USD";
+
+// 3) OHLCV + Technicals
+const candles = await (await fetch(`http://localhost:8000/api/prices/${sym}?timeframe=1y`)).json();
+const tech = await (await fetch(`http://localhost:8000/api/technical/${sym}`)).json();
+
+// 4) Signal + (optional) sentiment/onchain refresh reads
+const signal = await (await fetch(`http://localhost:8000/api/signal/${sym}`)).json();
+console.log({ sym, candles: candles.slice(-3), tech, signal });</pre>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Python</h3>
+                            <pre class="code-block">import requests
+
+BASE = "http://localhost:8000"
+
+# optional ETL
+requests.post(f"{BASE}/api/etl/run")
+
+symbols = requests.get(f"{BASE}/api/symbols", params={"q": "btc", "page": 1, "page_size": 50}).json()
+sym = (symbols.get("items") or [{"symbol": "BTC-USD"}])[0]["symbol"]
+
+prices = requests.get(f"{BASE}/api/prices/{sym}", params={"timeframe": "1y"}).json()
+tech = requests.get(f"{BASE}/api/technical/{sym}").json()
+sig = requests.get(f"{BASE}/api/signal/{sym}").json()
+
+print(sym)
+print(prices[-3:])
+print(tech["timeframes"]["1d"]["summary"])
+print(sig)</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Data Formats -->
+                <section class="scope-card rounded-2xl p-5 md:p-7 shadow-sm space-y-4">
+                    <h2 class="text-lg md:text-xl font-semibold flex items-center gap-2">
+                        <i data-lucide="braces" class="w-5 h-5 text-brand-orange"></i>
+                        Data Formats
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">OHLCV Candle</h3>
+                            <pre class="code-block">{
+  "date": "YYYY-MM-DD",
+  "open": float | null,
+  "high": float | null,
+  "low": float | null,
+  "close": float | null,
+  "volume": float | null
+}</pre>
+                        </div>
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Symbols Page</h3>
+                            <pre class="code-block">{
+  "items": [
+    {
+      "id": int,
+      "rank": int,
+      "symbol": "BTC-USD",
+      "name": "BTC",
+      "price": float | null,
+      "change": float | null,
+      "vol": float | null,
+      "mcap": float | null
+    }
+  ],
+  "total": int
+}</pre>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Indicator Output</h3>
+                            <pre class="code-block">{
+  "RSI (14)": { "value": float, "signal": "buy|sell|hold" },
+  "MACD (12,26,9)": { "value": float, "signal": "buy|sell|hold" }
+}</pre>
+                        </div>
+
+                        <div class="space-y-2">
+                            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Indicator Summary</h3>
+                            <pre class="code-block">{
+  "buy": int,
+  "sell": int,
+  "hold": int,
+  "overall": "buy|sell|hold|not-enough-data"
+}</pre>
+                        </div>
+                    </div>
+
+                    <p class="text-xs md:text-sm text-gray-500 dark:text-gray-400 mt-2">
+                        Other endpoints like <span class="kbd">/api/lstm</span>, <span class="kbd">/api/sentiment</span>, <span class="kbd">/api/onchain</span>, and <span class="kbd">/api/signal</span>
+                        may include additional fields depending on your internal module implementations.
+                    </p>
+                </section>
+
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<footer class="bg-brand-darker text-gray-500 text-xs md:text-sm py-6 mt-4 border-t border-gray-800 text-center">
+    &copy; 2025 CryptoScope Data Services — REST API Documentation
+</footer>
+
+<!-- Shared app (theme + router) -->
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

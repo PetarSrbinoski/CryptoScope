@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  api:
+    image: ${DOCKER_USERNAME}/tech-api:latest
+    container_name: tech_api
+    environment:
+      - PORT=8000
+      - TECHNICAL_MS_URL=http://technical_ms:8001
+      - LSTM_MS_URL=http://lstm_ms:8002
+      - DB_PATH=/data/crypto.db
+    ports:
+      - "8000:8000"
+    depends_on:
+      technical_ms:
+        condition: service_started
+      lstm_ms:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8000/docs"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 300s
+
+  technical_ms:
+    image: ${DOCKER_USERNAME}/technical-ms:latest
+    container_name: technical_ms
+    environment:
+      - DB_PATH=/data/crypto.db
+    ports:
+      - "8001:8001"
+
+  lstm_ms:
+    image: ${DOCKER_USERNAME}/lstm-ms:latest
+    container_name: lstm_ms
+    environment:
+      - DB_PATH=/data/crypto.db
+    ports:
+      - "8002:8002"
+
+  web:
+    image: ${DOCKER_USERNAME}/tech-web:latest
+    container_name: tech_web
+    ports:
+      - "8080:80"
+    depends_on:
+      - api

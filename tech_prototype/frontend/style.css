@@ -1,0 +1,114 @@
+
+.range-btn {
+    background-color: white;
+    color: #111;
+    border-color: #ddd;
+}
+
+html.dark .range-btn {
+    background-color: #1F2937;
+    color: #eee;
+    border-color: #374151;
+}
+
+.active-range {
+    background-color: #FF8C00 !important;
+    color: white !important;
+    border-color: #FF8C00 !important;
+}
+
+body {
+    /* Default Light */
+    background-color: #F9FAFB;
+    color: #111827;
+    overflow-x: hidden;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Dark Mode Body Override */
+html.dark body {
+    background-color: #0B0F19;
+    color: #F9FAFB;
+}
+
+/* Landing Page Background - Light */
+.landing-bg {
+    background: radial-gradient(circle at 50% 30%, rgba(255, 140, 0, 0.08) 0%, rgba(249, 250, 251, 1) 60%);
+    background-size: 100% 100%;
+}
+
+/* Landing Page Background - Dark */
+html.dark .landing-bg {
+    background: radial-gradient(circle at 50% 30%, rgba(255, 140, 0, 0.15) 0%, #0B0F19 70%);
+}
+
+.grid-pattern {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+}
+
+html.dark .grid-pattern {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+
+/* Component Styles */
+.scope-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* Light Mode Defaults */
+    border: 1px solid #E5E7EB;
+    background: #FFFFFF;
+}
+
+html.dark .scope-card {
+    border: 1px solid #374151;
+    background: #1F2937;
+}
+
+.scope-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 20px 30px -5px rgba(255, 140, 0, 0.2);
+    border-color: #FF8C00;
+}
+
+.panel-clean {
+    /* Glassmorphism Base */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid #E5E7EB;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+html.dark .panel-clean {
+    border: 1px solid #374151;
+    background: rgba(31, 41, 55, 0.85); /* Gray-800 with opacity */
+}
+
+/* Utilities */
+.hidden-view {
+    display: none !important;
+}
+
+.nav-link.active {
+    color: #111827;
+    border-bottom-color: #FF8C00;
+}
+
+html.dark .nav-link.active {
+    color: #FFFFFF;
+}
+
+html.dark .nav-link:hover {
+    color: #FF8C00;
+}
+
+/* Mobile Bottom Nav Active State */
+.mobile-nav-link.active {
+    color: #FF8C00;
+}
+
+.mobile-nav-link.active i {
+    stroke-width: 3px;
+}

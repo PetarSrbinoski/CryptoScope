@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+    <meta charset="UTF-8" />
+    <title>CryptoScope | Terminal</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#FF8C00',
+                            dark: '#111827',
+                            darker: '#0B0F19',
+                            card: '#1F2937',
+                            accent: '#FFF3E0'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif']
+                    },
+                    animation: {
+                        ticker: 'ticker 40s linear infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards'
+                    },
+                    keyframes: {
+                        ticker: {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-100%)' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: 0 },
+                            '100%': { opacity: 1 }
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body
+    class="min-h-screen flex flex-col font-sans antialiased"
+    data-page="dashboard"
+>
+    <div id="app-container" class="min-h-screen flex flex-col pb-20 md:pb-0">
+        <div
+            class="bg-brand-darker text-white overflow-hidden whitespace-nowrap py-2 text-xs font-medium tracking-wide z-40 border-b border-gray-800"
+        >
+            <div id="ticker" class="inline-block animate-ticker"></div>
+        </div>
+
+        <nav class="panel-clean sticky top-0 z-40 shadow-sm">
+            <div class="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16 md:h-20">
+                    <div
+                        onclick="app.router.go('landing')"
+                        class="flex items-center gap-2 md:gap-3 group cursor-pointer"
+                    >
+                        <div
+                            class="bg-brand-orange text-white p-1.5 md:p-2 rounded-lg shadow-sm"
+                        >
+                            <i
+                                data-lucide="scan-search"
+                                class="w-5 h-5 md:w-6 md:h-6"
+                            ></i>
+                        </div>
+                        <span
+                            class="text-xl md:text-2xl font-extrabold tracking-tight text-gray-900 dark:text-white"
+                            >CRYPTO<span class="text-brand-orange"
+                                >SCOPE</span
+                            ></span
+                        >
+                    </div>
+
+                    <div class="hidden md:flex items-center space-x-8">
+                        <button
+                            onclick="app.router.go('dashboard')"
+                            id="nav-dashboard"
+                            class="nav-link text-gray-900 dark:text-white font-semibold border-b-2 border-brand-orange px-1 py-7 h-20"
+                        >
+                            Market Data
+                        </button>
+
+                        <button onclick="window.location.href='api.html'">
+                            API Docs
+                        </button>
+                    </div>
+
+                    <div
+                        class="flex items-center gap-3 md:gap-4 w-auto justify-end"
+                    >
+                        <div
+                            class="relative group w-full max-w-xs hidden md:block"
+                        >
+                            <div
+                                class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+                            >
+                                <i
+                                    data-lucide="search"
+                                    class="h-4 w-4 text-gray-400 group-focus-within:text-brand-orange transition-colors"
+                                ></i>
+                            </div>
+                            <input
+                                type="text"
+                                oninput="app.ui.handleSearch(this.value)"
+                                placeholder="Filter assets..."
+                                class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 dark:border-gray-700 rounded-xl leading-5 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:bg-white dark:focus:bg-gray-700 focus:ring-2 focus:ring-brand-orange/50 focus:border-brand-orange sm:text-sm transition-all"
+                            />
+                        </div>
+
+                        <button
+                            onclick="app.theme.toggle()"
+                            class="p-2 md:p-2.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-brand-orange hover:text-white transition-all"
+                        >
+                            <i
+                                data-lucide="moon"
+                                class="w-5 h-5 hidden dark:block"
+                            ></i>
+                            <i
+                                data-lucide="sun"
+                                class="w-5 h-5 block dark:hidden"
+                            ></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div
+            class="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-brand-darker border-t border-gray-200 dark:border-gray-800 p-2 z-50 pb-safe shadow-[0_-5px_15px_rgba(0,0,0,0.05)] dark:shadow-none"
+        >
+            <div class="flex justify-around items-center h-14">
+                <button
+                    onclick="app.router.go('dashboard')"
+                    id="mob-nav-dashboard"
+                    class="mobile-nav-link flex flex-col items-center justify-center w-full h-full text-brand-orange"
+                >
+                    <i data-lucide="layout-grid" class="w-7 h-7"></i>
+                </button>
+                <button
+                    onclick="app.router.go('watchlist')"
+                    id="mob-nav-watchlist"
+                    class="mobile-nav-link flex flex-col items-center justify-center w-full h-full text-gray-400 dark:text-gray-500"
+                >
+                    <i data-lucide="star" class="w-7 h-7"></i>
+                </button>
+                <button
+                    onclick="document.getElementById('mobile-search-input').focus()"
+                    class="mobile-nav-link flex flex-col items-center justify-center w-full h-full text-gray-400 dark:text-gray-500"
+                >
+                    <i data-lucide="search" class="w-7 h-7"></i>
+                </button>
+            </div>
+        </div>
+
+        <main
+            class="flex-grow max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full relative"
+        >
+            <div id="view-dashboard" class="animate-fade-in">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-start md:items-end mb-6 md:mb-10 gap-4"
+                >
+                    <div>
+                        <h1
+                            class="text-2xl md:text-4xl font-bold text-gray-900 dark:text-white tracking-tight"
+                        >
+                            Data Terminal
+                        </h1>
+                        <p
+                            class="text-gray-500 dark:text-gray-400 mt-1 md:mt-2 text-sm md:text-lg"
+                        >
+                            Global Cap:
+                            <span
+                                class="font-bold text-gray-900 dark:text-white"
+                                >$2.48T</span
+                            >
+                            <span
+                                class="text-green-500 text-xs md:text-sm bg-green-500/10 px-1.5 py-0.5 rounded ml-2"
+                                >+1.2%</span
+                            >
+                        </p>
+                    </div>
+
+                    <div class="w-full md:hidden">
+                        <div class="relative">
+                            <i
+                                data-lucide="search"
+                                class="absolute left-3 top-3 w-4 h-4 text-gray-400"
+                            ></i>
+                            <input
+                                id="mobile-search-input"
+                                type="text"
+                                oninput="app.ui.handleSearch(this.value)"
+                                placeholder="Search coins..."
+                                class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-orange dark:text-white transition-colors"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    id="top-cards-container"
+                    class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 md:gap-6 mb-8 md:mb-12"
+                ></div>
+
+                <div
+                    class="panel-clean rounded-2xl overflow-hidden shadow-sm"
+                >
+                    <div
+                        class="p-4 md:p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-800/50"
+                    >
+                        <h2
+                            class="text-lg md:text-xl font-bold text-gray-900 dark:text-white flex items-center gap-3"
+                        >
+                            <i
+                                data-lucide="bar-chart-2"
+                                class="w-5 h-5 md:w-6 md:h-6 text-brand-orange"
+                            ></i>
+                            Market Assets
+                        </h2>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table
+                            class="w-full text-left whitespace-nowrap"
+                        >
+                            <thead
+                                class="bg-gray-50 dark:bg-gray-800/50 text-xs uppercase text-gray-500 dark:text-gray-400 font-semibold border-b border-gray-200 dark:border-gray-700"
+                            >
+                                <tr>
+                                    <th class="py-4 md:py-5 pl-4 md:pl-8">
+                                        #
+                                    </th>
+                                    <th class="py-4 md:py-5 px-2 md:px-4">
+                                        Asset
+                                    </th>
+                                    <th
+                                        class="py-4 md:py-5 px-2 md:px-4 text-right"
+                                    >
+                                        Price
+                                    </th>
+                                    <th
+                                        class="py-4 md:py-5 px-2 md:px-4 text-right"
+                                    >
+                                        24h %
+                                    </th>
+                                    <th
+                                        class="py-4 md:py-5 px-2 md:px-4 text-right hidden md:table-cell"
+                                    >
+                                        Vol (24h)
+                                    </th>
+                                    <th
+                                        class="py-4 md:py-5 px-2 md:px-4 text-right pr-4 md:pr-6"
+                                    >
+                                        Action
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody
+                                id="market-table-body"
+                                class="divide-y divide-gray-200 dark:divide-gray-700 text-sm"
+                            ></tbody>
+                        </table>
+                    </div>
+                    <div
+                        id="no-results"
+                        class="hidden-view p-8 md:p-12 text-center text-gray-500 dark:text-gray-400"
+                    >
+                        No assets found matching your search.
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
